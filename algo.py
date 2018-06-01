@@ -1,8 +1,9 @@
 from geopy.distance import distance as geo_dist
-from graph import Graph
+#from graph import Graph
 from utils import load_metadata
 from utils import getLongLat
 import pandas as pd
+import numpy as np
 #geo_dist((lat1, long1), (lat2, long2))geo_dist
 
 
@@ -51,7 +52,7 @@ def getNextStation(df, line_id, station):
 def getNextStationsDetails(df, line_id, station):
     df = df.copy()
     df = viewLine(df, line_id)
-    df = df.sort_values('ARRIVAL_TIME')
+    df = df.sort_values('DEPARTURE_TIME')
     select_next = False
     nexts = []
     departure_time = None
@@ -60,8 +61,9 @@ def getNextStationsDetails(df, line_id, station):
             nexts.append((departure_time, row))
             select_next = False
         if(row['STOP_STATION_NAME'] == station):
-            select_next = True
-            departure_time = row.DEPARTURE_TIME
+            if row.DEPARTURE_TIME != np.nan:
+                select_next = True
+                departure_time = row.DEPARTURE_TIME
     return nexts
 
 #To be run once for all station and result save in a map (or table) 
@@ -73,7 +75,7 @@ def getNearByStation(df, station):
     df = df[df['newDist'] < 0.1]
     return df
 
-def find_path(g: Graph, start_station, end_station, departure_time):
+def find_path(g, start_station, end_station, departure_time):
 #WARNING this algo doesnt take into acount if a route is faster but with two hop 
 #the queue contains a tuple (station, time at that station)
     already_visited = []

@@ -40,7 +40,7 @@ def buildGraph(df, allStation = []):
     key_func = lambda x: x[0]
     stationsConnection = dict()
     if len(allStation) == 0:
-        allStation = get_all_stops
+        allStation = get_all_stops()
     for s in tqdm(allStation):
         print(s)
         lines = getAllLine(df,s)
