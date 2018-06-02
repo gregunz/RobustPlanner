@@ -67,13 +67,14 @@ def getNextStationsDetails(df, line_id, station):
     return nexts
 
 #To be run once for all station and result save in a map (or table) 
-def getNearByStation(df, station):
+def getNearByStation(df, station, dist=0.3):
     df = df.copy()
     loc = getLongLat(station)
     df = df.dropna(subset=['Remark'])
-    df['newDist'] = df.apply(lambda x: geo_dist((x.Latitude, x.Longitude), loc), axis=1)
-    df = df[df['newDist'] < 0.1]
-    return df
+    df['newDist'] = df.apply(lambda x: geo_dist((x.Latitude, x.Longitude), loc).km, axis=1)
+    df = df[df['newDist'] < dist]
+    df = df[df['Remark'] != station]
+    return df[['Remark', 'newDist']].values.tolist()
 
 def find_path(g, start_station, end_station, departure_time):
 #WARNING this algo doesnt take into acount if a route is faster but with two hop 
@@ -84,7 +85,7 @@ def find_path(g, start_station, end_station, departure_time):
     df_meta = load_metadata()
     q.append((start_station, departure_time))
     total_dist = dist_between_station(df_meta,start_station, end_station)
-    max_dist = total_dist * 1.2
+    max_dist = total_dist * 1.5
     while(len(q)>0):#(not q.empty()):
         q = sorted(q, key=lambda x: x[1]) # extracting the smalest value can be done in O(n) and not in O(n*ln(n))
         s, time = q.pop(0)
