@@ -1,22 +1,38 @@
 from utils import get_all_stops
 from tqdm import tqdm_notebook as tqdm
+from datetime import timedelta
 from itertools import groupby
 from operator import itemgetter
 from algo import *
 import pickle
 
+#Useless
 class StationConnections():
     connections = dict()
     walkConnections = dict()
     
     
+def dist_to_time(dist, speed=4):
+    """
+    dist: Distance in km
+    speed: Speed is in km per hour (kmh)
+    Return: Time as a delta time object """
+    time = dist / speed
+    return timedelta(hours=time)
+
 class ByWalkConnection():
-    toStation:str = ""
-    distance:int = 500 #in metres
+    toStation = ""
+    distance = 0 #in km
+
+    def __init__(self, stationName, dist):
+        self.toStation = stationName
+        self.distance = dist
     
-    
+    def nextDeparture(self, time):
+        return (time, time + dist_to_time(self.distance))
+
 class Connection():
-    toStation:str = "" #Station to which we are connected
+    toStation = "" #Station to which we are connected
     departures = [] #(dep_time,arrival_time) assume sorted by arrival time
     
     def __init__(self, stationName, dep):
@@ -57,5 +73,25 @@ def buildGraph(df, allStation = []):
     pickle.dump(g, open("pickle/graph.p", "wb" ))
     return g
 
+def updateGraphWithWalk(g):
+    """
+    WARNING this method should not be call more than once
+    """
+    #g = g_.deepcopy()
+    allStation = get_all_stops()
+    df_meta = load_metadata()
+    for s in tqdm(allStation):
+        print(s)
+        nearStations = getNearByStation(df_meta, s, dist=0.5)
+        nearConnection = list(map(lambda x: ByWalkConnection(x[0], x[1]), nearStations))
+        if s in g.stationsConnection:
+            g.stationsConnection[s] = g.stationsConnection[s] + nearConnection 
+        else:
+            g.stationsConnection[s] = nearConnection
+    pickle.dump(g, open("pickle/graph_walk.p", "wb" ))
+    return g
+
 def getGraph():
     return pickle.load(open("pickle/graph.p", "rb" ))
+def getWalkGraph():
+    return pickle.load(open("pickle/graph_walk.p", "rb" ))
