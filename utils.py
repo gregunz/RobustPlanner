@@ -1,6 +1,7 @@
 from geopy.distance import distance as geo_dist
 import pandas as pd
 from translation import translate
+import pickle
 
 def load_data(file, translated = False):
     parse_dates = ['BETRIEBSTAG', 'ANKUNFTSZEIT', 'AN_PROGNOSE', "ABFAHRTSZEIT", "AB_PROGNOSE"]
@@ -17,6 +18,18 @@ def load_data(file, translated = False):
         return translate(df)
     else:
         return df
+
+def store_all_stops():
+    stops = get_all_stops()
+    pickle.dump(stops, open("pickle/stops.p", "wb" ))
+def load_all_stops():
+    return pickle.load(open("pickle/stops.p", "rb" ))
+
+def store_LongLatDict():
+    d = createLongLatDict()
+    pickle.dump(d, open("pickle/longLatDict.p", "wb" ))
+def load_LongLatDict():
+    return pickle.load(open("pickle/longLatDict.p", "rb" ))
 
 def get_all_stops():
     metadata_df = load_metadata()
