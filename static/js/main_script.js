@@ -185,17 +185,20 @@ $("#duration_slider").ionRangeSlider({
 
 // Form submission
 $('#left_panel_form').on( "submit", function( event ) {
+    console.log("charles fait super chier")
     showLoader(true)
     event.preventDefault();
     let params = $( this ).serialize();
     $.get('/api/v1.0/connections', params, function(json) {
         showLoader(false)
         console.log(json);
-        if(json.code == 500) alert("Server side error   ")
-
-        cities = json.city_path
-        cities = cities.map(x => new city(x[0], x[1], x[2]))
-        draw_path(cities);
+        if(json.code == 500) {
+            alert("Server side error")
+        } else {
+            cities = json.city_path
+            cities = cities.map(x => new city(x[0], x[1], x[2]))
+            draw_path(cities);
+        }
     });
 });
 
@@ -221,5 +224,5 @@ $.get(STOP_API_URL, function(json) {
 const submitButton = d3.select('#submit_button');
 
 d3.select('#submit_button').on('click', function() {
-    $('#left_panel_form').submit();
+    //$('#left_panel_form').submit();
 })
