@@ -25,16 +25,6 @@
       gtag('js', new Date());
 
       gtag('config', 'UA-114753695-1');
-
-    $(document).ready(function(){
-          console.log($('input[name="date"]'))
-          $('input[name="date"]').datepicker({
-            format: "dd MM yyyy - hh:ii",
-            autoclose: true,
-            todayBtn: true,
-            pickerPosition: "bottom-left"
-          });
-    })
       
     </script>
 
@@ -56,26 +46,26 @@
               <div class="input-group-prepend">
                 <span class="input-group-text" id="from_addon">From</span>
               </div>
-              <select class="form-control city_select" id="city_from" aria-describedby="from_addon" name="city_from" required>
+              <select class="form-control city_select" id="departure" aria-describedby="from_addon" name="departure" required>
               </select>
             </div>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text" id="to_addon">To</span>
               </div>
-              <select class="form-control city_select" city_selectid="city_to" aria-describedby="to_addon" name="city_to" required>
+              <select class="form-control city_select" city_selectid="arrival" aria-describedby="to_addon" name="arrival" required>
               </select>
             </div>
             
             <div class="form-group">
               <label for="date_slider" control-label>Starting time</label>
-              <input type="date" id="date_selection" name="date_selection"/>
-              <input type="time" id="time_selection" name="time_selection"/>
+              <input type="date" id="start_date" name="start_date"/>
+              <input type="time" id="start_time" name="start_time"/>
             </div>
 
             <div class="form-group">
               <label for="duration_slider" control-label>Certainty</label>
-              <input type="text" id="duration_slider" name="max_travel_time" value="" />
+              <input type="text" id="duration_slider" name="certainty" value="" />
             </div>
 
             <div class="form-group">
@@ -96,6 +86,9 @@
     </div>
 
 
+    <div id="loader-overlay" style="visibility: hidden">
+      <div class="loader">Loading...</div>
+    </div>
 
     <!-- SCRIPTS -->
     <script src="https://d3js.org/d3.v4.min.js"></script>

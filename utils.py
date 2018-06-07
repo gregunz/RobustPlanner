@@ -33,6 +33,15 @@ def getLongLat(station):
     s1 = meta_df.loc[station]
     return (s1.Latitude,s1.Longitude)
 
+def createLongLatDict():
+    meta_df = load_metadata()
+    meta_df.index = meta_df['Remark']
+    d = dict()
+    for stat in meta_df['Remark'].values:
+        s = meta_df.loc[stat]
+        d[stat] = [s.Latitude,s.Longitude]
+    return d
+
 def dist_between_stations(station1, station2):
     #TODO optimize such that we dont need to read two times the metadata file
     return geo_dist(getLongLat(station1), getLongLat(station2))

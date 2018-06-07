@@ -87,13 +87,13 @@ function getTrain_Path(trainline) {
 function draw_path(path) {
   let i = 0;
   clearMap(mymap);
-
+  draw_marker(path[0]);
   while(i < path.length-1) {
-    draw_marker(get_city_by_name(path[i]));
+    //draw_marker(path[i]);
     create_line(path[i], path[i+1]);
     i = i + 1;
   }
-  draw_marker(get_city_by_name(path[path.length-1]));
+  draw_marker(path[path.length-1]);
   update_graph();
 }
 
@@ -126,9 +126,9 @@ function get_city_by_name(name) {
 let myLines = [];
 let myMarkers = [];
 
-function create_line(city_name_1, city_name_2) {
-  city1 = get_city_by_name(city_name_1);
-  city2 = get_city_by_name(city_name_2);
+function create_line(city1, city2) {
+  //city1 = city_name_1//get_city_by_name(city_name_1);
+  //city2 = city_name_2//get_city_by_name(city_name_2);
   myLines.push({
     'type': 'LineString',
     'coordinates': [[city1.long, city1.lat], [city2.long, city2.lat]]
@@ -179,22 +179,37 @@ $("#duration_slider").ionRangeSlider({
         "85%", "90%", "95%", "100%"
     ],
     onChange: function (data) {
-        $('#left_panel_form').submit();
+        //$('#left_panel_form').submit();
     },
 });
 
 // Form submission
-const TOUR_API_URL = '/api/v1.0/tours'
-
 $('#left_panel_form').on( "submit", function( event ) {
+    showLoader(true)
     event.preventDefault();
     let params = $( this ).serialize();
-
-    $.get(TOUR_API_URL, params, function(json) {
+    $.get('/api/v1.0/connections', params, function(json) {
+        showLoader(false)
         console.log(json);
-        draw_path(json.tour);
+        if(json.code == 500) alert("Server side error   ")
+
+        cities = json.city_path
+        cities = cities.map(x => new city(x[0], x[1], x[2]))
+        draw_path(cities);
     });
 });
+
+stateLoader = false
+function toggleLoader() {
+    stateLoader = !stateLoader
+    showLoader(stateLoader)
+}
+
+function showLoader(show) {
+    d3.select('#main_container').classed('blurdy', show)
+    d3.select('#loader-overlay').style("visibility", show?"visible":"hidden");
+}
+
 city_names = []
 const STOP_API_URL = '/api/v1.0/stops'
 $.get(STOP_API_URL, function(json) {
@@ -205,7 +220,6 @@ $.get(STOP_API_URL, function(json) {
 
 const submitButton = d3.select('#submit_button');
 
-// Submit automatically for each form change
-d3.selectAll("select").on("change", function () {
+d3.select('#submit_button').on('click', function() {
     $('#left_panel_form').submit();
-});
+})
