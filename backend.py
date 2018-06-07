@@ -14,11 +14,20 @@ from graph import *
 app = Flask(__name__)
 
 g = None
+stops = []
 
 @app.route('/', methods=['GET'])
 def front_end():
     """Return the front-end app"""
     return app.send_static_file('index.html')
+
+@app.route('/api/v1.0/stops', methods=['GET'])
+def get_stops():
+    res = {
+        'stops': stops
+    }
+    return jsonify(res)
+
 
 @app.route('/api/v1.0/connections', methods=['GET'])
 def get_connections():
@@ -37,6 +46,10 @@ def get_connections():
 
 if __name__ == '__main__':
     #load graph
+    print("Loading some files....")
     g = getWalkGraph()
+    stops = get_all_stops()
+    print("files loaded")
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+    

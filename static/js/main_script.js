@@ -1,5 +1,5 @@
 // Leaflet initialization
-let mymap = L.map('map_div').setView([46.879, 9.2], 8);
+let mymap = L.map('map_div').setView([47.378177, 8.540192], 12);
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -172,10 +172,11 @@ $("#duration_slider").ionRangeSlider({
     grid: true,
     from: 3,
     values: [
-        "1d", "2d", "3d",
-        "4d", "5d", "6d",
-        "7d", "8d", "9d",
-        "10d", "11d", "12d"
+        "5%", "10%", "15%", "20%",
+        "25%", "30%", "35%", "40%",
+        "45%", "50%", "55%", "60%",
+        "65%", "70%", "75%", "80%",
+        "85%", "90%", "95%", "100%"
     ],
     onChange: function (data) {
         $('#left_panel_form').submit();
@@ -194,65 +195,13 @@ $('#left_panel_form').on( "submit", function( event ) {
         draw_path(json.tour);
     });
 });
-
-// Fill in the city_selects
-city_names = [
-    'Brig-Gils',
-    'Davos',
-    'Disentis/Mustér',
-    'Zürich',
-    'Lucerne',
-    'Zermatt',
-    'Zweisimmen',
-    'Flüelen',
-    'Lugano',
-    'St. Moritz',
-    'Montreux',
-    'Engelberg',
-    'Gstaad',
-    'Chur',
-    'Geneva',
-    'Locarno',
-    'Stechelberg (Schilthornbahn)',
-    'Schaffhausen',
-    'Andermatt',
-    'Berne',
-    'Lauterbrunnen',
-    'Wattwil',
-    'Lausanne',
-    'Nyon',
-    'Fribourg',
-    'Gruyeres',
-    'St gallen',
-    'Solerthurn',
-    'Interlaken',
-    'Belinzona',
-    'Zug',
-    'Vevey',
-    'Thun',
-    'La chaux-de-fonds',
-    'Neuchatel',
-    'Arolla',
-    'Arosa',
-    'Bienne',
-    'Sion, Switzerland',
-    'Altdorf (UR)',
-    'Delemont',
-    'Frauenfeld',
-    'Langenthal',
-    'le Locle',
-    'Liestal',
-    'Olten',
-    'Martigny',
-    'Schwyz',
-    'Stans',
-    'Val-de-Travers',
-    'Wil',
-    'Yverdon-les-bains',
-    'Meyrin',
-    'Basel',
-].sort();
-d3.selectAll('.city_select').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; });
+city_names = []
+const STOP_API_URL = '/api/v1.0/stops'
+$.get(STOP_API_URL, function(json) {
+    city_names = json.stops.sort()
+    console.log(json)
+    d3.selectAll('.city_select').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; });
+})
 
 const submitButton = d3.select('#submit_button');
 

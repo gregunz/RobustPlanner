@@ -66,11 +66,7 @@
               <select class="form-control city_select" city_selectid="city_to" aria-describedby="to_addon" name="city_to" required>
               </select>
             </div>
-            <div class="form-group">
-              <label for="duration_slider" control-label>Maximum travel duration</label>
-              <input type="text" id="duration_slider" name="max_travel_time" value="" />
-            </div>
-
+            
             <div class="form-group">
               <label for="date_slider" control-label>Starting time</label>
               <input type="date" id="date_selection" name="date_selection"/>
@@ -78,23 +74,15 @@
             </div>
 
             <div class="form-group">
-              <label for="duration_slider" control-label>Tags of interests</label>
-              <select multiple class="form-control" id="tags_multichoice" name="query" required>
-                <option>arts</option>
-                <option>museum</option>
-                <option>lake</option>
-                <option>mountains</option>
-                <option>chocolate</option>
-                <option>sport</option>
-                <option>culture</option>
-                <option>science</option>
-                <option>economics</option>
-                <option>clubbing</option>
-                <option>wellness</option>
-                <option>wildlife</option>
-                <option>music</option>
-                <option>watches</option>
-              </select>
+              <label for="duration_slider" control-label>Certainty</label>
+              <input type="text" id="duration_slider" name="max_travel_time" value="" />
+            </div>
+
+            <div class="form-group">
+              <label for="duration_slider" control-label>Proposed connections:</label>
+              <div>
+                From A to B
+              </div>
             </div>
 
             <button type="submit" id="submit_button" class="btn btn-danger btn-block">Let's travel!</button>
