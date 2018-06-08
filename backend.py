@@ -36,11 +36,10 @@ def get_connections():
     start_date = request.args.get('start_date')
     start_date = '2017-09-13' #TODO later to be removed
     departure_time = start_date + " " + start_time
-
+    departure_time = pd.to_datetime(departure_time)
     departure_station = request.args.get('departure')
     arrival_station = request.args.get('arrival')
 
-    departure_time = pd.to_datetime(start_time)
     path = []
     try:
         path = find_path(g, departure_station, arrival_station, departure_time)

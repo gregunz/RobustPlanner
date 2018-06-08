@@ -86,7 +86,8 @@ def find_path(g, start_station, end_station, departure_time):
     q.append((start_station, departure_time))
     total_dist = dist_between_station(df_meta,start_station, end_station)
     max_dist = total_dist * 1.5
-    while(len(q)>0):#(not q.empty()):
+    end = False
+    while(len(q)>0 and not end):#(not q.empty()):
         q = sorted(q, key=lambda x: x[1]) # extracting the smalest value can be done in O(n) and not in O(n*ln(n))
         s, time = q.pop(0)
         already_visited.append(s)
@@ -95,6 +96,7 @@ def find_path(g, start_station, end_station, departure_time):
             for c in allConnection:
                 if c.toStation == end_station:
                     print('End station founded')
+                    end = True
                 dep = c.nextDeparture(time)
                 if dep is not None:
                     dist = dist_between_station(df_meta, c.toStation, end_station)
