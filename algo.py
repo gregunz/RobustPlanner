@@ -76,16 +76,28 @@ def getNearByStation(df, station, dist=0.3):
     df = df[df['Remark'] != station]
     return df[['Remark', 'newDist']].values.tolist()
 
+class Station:
+    previous_station: str = ''
+    time: int = 0
+    trip_id: str = ''
+    failure_prob: float = 0.0
+
+    def __init__(self, previous_station, time, trip_id, failure_prob):
+        self.previous_station = previous_station
+        self.time = time
+        self.trip_id = trip_id
+        self.failure_prob = failure_prob
+
+
 def find_path(g, start_station, end_station, departure_time):
 #WARNING this algo doesnt take into acount if a route is faster but with two hop 
 #the queue contains a tuple (station, time at that station)
     already_visited = []
     previous_station = dict()
     q = []#queue.Queue()
-    df_meta = load_metadata()
     q.append((start_station, departure_time))
-    total_dist = dist_between_station(df_meta,start_station, end_station)
-    max_dist = total_dist * 1.5
+    #total_dist = dist_between_station(df_meta,start_station, end_station)
+    #max_dist = total_dist * 1.5
     end = False
     while(len(q)>0 and not end):#(not q.empty()):
         q = sorted(q, key=lambda x: x[1]) # extracting the smalest value can be done in O(n) and not in O(n*ln(n))
@@ -96,18 +108,17 @@ def find_path(g, start_station, end_station, departure_time):
             for c in allConnection:
                 if c.toStation == end_station:
                     print('End station founded')
-                    end = True
+                    end = False
                 dep = c.nextDeparture(time)
                 if dep is not None:
-                    dist = dist_between_station(df_meta, c.toStation, end_station)
+                    #dist = dist_between_station(df_meta, c.toStation, end_station)
                     if c.toStation not in previous_station:
                         previous_station[c.toStation] = (s, dep[1])
                     elif previous_station[c.toStation][1] > dep[1]:
                         previous_station[c.toStation] = (s, dep[1])
                         if c.toStation in already_visited:
                             already_visited.remove(c.toStation)
-                    if c.toStation not in already_visited and\
-                        dist < max_dist:
+                    if c.toStation not in already_visited:
                         already_visited.append(c.toStation)
                         q.append((c.toStation, dep[1])) #dep[1] is arrival time
                     if c.toStation in already_visited:
