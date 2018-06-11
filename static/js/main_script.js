@@ -47,13 +47,15 @@ class Connection {
 function draw_path(path) {
   let i = 0;
   clearMap(mymap);
-  draw_marker(path[0].from_city);
+  draw_marker(path[0].from_city, path[0].departure_time);
   while(i < path.length) {
     //draw_marker(path[i]);
     create_line(path[i]);
     i = i + 1;
   }
-  draw_marker(path[path.length-1].to_city);
+  draw_marker(path[path.length-1].to_city, 
+    path[path.length-1].arrival_time + '<br>Proba of success: ' + 
+    path[path.length-1].proba_cumul);
   update_graph();
 }
 
@@ -66,10 +68,10 @@ function draw_point(city) {
     }).addTo(mymap);
 }
 
-function draw_marker(city) {
+function draw_marker(city, text) {
     let marker = L.marker([city.lat, city.long]);
     mymap.addLayer(marker);
-    marker.bindPopup(city.name);
+    marker.bindPopup(city.name + '<br>' + text);
     myMarkers.push(marker);
 }
 
@@ -83,7 +85,7 @@ function create_line(connection) {
     myLines.push({
         'type': 'LineString',
         'coordinates': [[city1.long, city1.lat], [city2.long, city2.lat]],
-        'proba': connection.proba,
+        'proba': connection.proba,//proba_cumul,
         'trip_id': connection.trip_id
     });
 }
@@ -116,7 +118,6 @@ function clearMap(m) {
 function update_graph() {
   L.geoJSON(myLines, {
       style: function (line) {
-          console.log(line)
           prob = line.geometry.proba//Math.random()
           if(line.geometry.trip_id == 'Walk'){
             myStyle.dashArray = '5, 5'
@@ -146,13 +147,11 @@ $("#duration_slider").ionRangeSlider({
 
 // Form submission
 $('#left_panel_form').on( "submit", function( event ) {
-    console.log("charles fait super chier")
     showLoader(true)
     event.preventDefault();
     let params = $( this ).serialize();
     $.get('/api/v1.0/connections', params, function(json) {
         showLoader(false)
-        console.log(json);
         if(json.code == 500) {
             alert("No path found")
         } else {
@@ -161,7 +160,6 @@ $('#left_panel_form').on( "submit", function( event ) {
                 new city(...x[1]),
                 x[2], x[3], x[4], x[5], x[6]))
             console.log(connections)
-            console.log(connections[connections.length-1].from_city.lat)
             center = [(connections[0].to_city.lat + connections[connections.length-1].from_city.lat)/2, (connections[0].to_city.long + connections[connections.length-1].from_city.long)/2]
             mymap.fitBounds([
                 [connections[0].from_city.lat, connections[0].from_city.long],
@@ -181,7 +179,6 @@ city_names = []
 const STOP_API_URL = '/api/v1.0/stops'
 $.get(STOP_API_URL, function(json) {
     city_names = json.stops.sort()
-    console.log(json)
     //d3.selectAll('.city_select').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; });
     d3.select('#departure').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; }).property("selected", function(d){ return d === 'Zürich Flughafen, Bahnhof'; })
     d3.select('#arrival').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; }).property("selected", function(d){ return d === 'Zürich, ETH/Universitätsspital'; })
@@ -201,9 +198,11 @@ legend.onAdd = function (map) {
     div.innerHTML += "<div>Certainty:</div>"
     for (var i = 0; i < grades.length-1; i++) {
         div.innerHTML +=
-            '<i style="background:' + d3.interpolateRdYlGn((grades[i] + grades[i + 1])/200) + '"></i> ' +
-            grades[i] + '&ndash;' + grades[i + 1]  + '%<br>';
+            '<div style="display: inline-block"><i style="background:' + d3.interpolateRdYlGn((grades[i] + grades[i + 1])/200) + '"></i> ' +
+            grades[i] + '&ndash;' + grades[i + 1]  + '%</div><br>';
     }
+    div.innerHTML +=
+            '<div style="display: inline-block"><i style="background: black"></i> walking</div><br>';
 
     return div;
 };
@@ -212,6 +211,5 @@ legend.addTo(mymap);
 
 //defautl values
 d = new Date()
-console.log(d.getHours() + ":" + d.getMinutes())
 document.getElementById("start_date").valueAsDate = d
 document.getElementById("start_time").value = d.getHours() + (d.getMinutes()<10?":0":":") + d.getMinutes()
