@@ -75,12 +75,12 @@ class Connection():
             departure_time = dep.departure_time
             if dep.trip_id != from_trip:
                 #add a minimal time to make a change
-                departure_time = departure_time - datetime.timedelta(minutes=2)
+                departure_time = departure_time - datetime.timedelta(minutes=0)
             if departure_time >= time:              
-                if dep.trip_id == from_trip:
+                if dep.trip_id == from_trip or from_trip == 'Walk' or from_trip == None:
                     risk = 0.0
                 else:
-                    risk = get_risk(df_risk, [2, dep.trip_id], (departure_time - time).seconds)
+                    risk = get_risk(df_risk, [2, from_trip], (departure_time - time).seconds)
                 if proba_threshold <= current_proba * (1-risk):
                     return dep, risk
         return None, None
