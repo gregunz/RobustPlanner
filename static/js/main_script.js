@@ -1,15 +1,18 @@
 // Leaflet initialization
 let mymap = L.map('map_div').setView([47.378177, 8.540192], 12);
 
-L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
+	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 	subdomains: 'abcd',
-	maxZoom: 19
+	minZoom: 0,
+	maxZoom: 20,
+	ext: 'png'
 }).addTo(mymap);
-var OpenRailwayMap = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
-	maxZoom: 19,
-	attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | Map style: &copy; <a href="https://www.OpenRailwayMap.org">OpenRailwayMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-}).addTo(mymap);
+// var OpenRailwayMap = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+// 	maxZoom: 19,
+// 	attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | Map style: &copy; <a href="https://www.OpenRailwayMap.org">OpenRailwayMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+// }).addTo(mymap);
+L.control.scale().addTo(mymap)
 
 class city {
     constructor(name, lat, long) {
@@ -18,6 +21,17 @@ class city {
         this.long = long;
     }
   }
+class Connection {
+    constructor(from_city, to_city, departure_time, arrival_time, trip_id, proba, proba_cumul) {
+        this.from_city = from_city;
+        this.to_city = to_city;
+        this.departure_time = departure_time;
+        this.arrival_time = arrival_time;
+        this.proba = proba;
+        this.proba_cumul = proba_cumul;
+        this.trip_id = trip_id;
+    }
+}
 
 // let train_path_data;
 
@@ -33,13 +47,13 @@ class city {
 function draw_path(path) {
   let i = 0;
   clearMap(mymap);
-  draw_marker(path[0]);
-  while(i < path.length-1) {
+  draw_marker(path[0].from_city);
+  while(i < path.length) {
     //draw_marker(path[i]);
-    create_line(path[i], path[i+1]);
+    create_line(path[i]);
     i = i + 1;
   }
-  draw_marker(path[path.length-1]);
+  draw_marker(path[path.length-1].to_city);
   update_graph();
 }
 
@@ -63,11 +77,15 @@ function draw_marker(city) {
 let myLines = [];
 let myMarkers = [];
 
-function create_line(city1, city2) {
-  myLines.push({
-    'type': 'LineString',
-    'coordinates': [[city1.long, city1.lat], [city2.long, city2.lat]]
-  });
+function create_line(connection) {
+    city1 = connection.from_city
+    city2 = connection.to_city
+    myLines.push({
+        'type': 'LineString',
+        'coordinates': [[city1.long, city1.lat], [city2.long, city2.lat]],
+        'proba': connection.proba,
+        'trip_id': connection.trip_id
+    });
 }
 
 var myStyle = {
@@ -97,7 +115,18 @@ function clearMap(m) {
 
 function update_graph() {
   L.geoJSON(myLines, {
-      style: myStyle
+      style: function (line) {
+          console.log(line)
+          prob = line.geometry.proba//Math.random()
+          if(line.geometry.trip_id == 'Walk'){
+            myStyle.dashArray = '5, 5'
+            myStyle.color = '#000000'
+          } else {
+            myStyle.dashArray = ''
+            myStyle.color = d3.interpolateRdYlGn(prob)//"#55ed65"
+          }
+          return myStyle
+    }
   }).addTo(mymap);
 }
 
@@ -105,7 +134,7 @@ function update_graph() {
 // Ion Slider
 $("#duration_slider").ionRangeSlider({
     grid: true,
-    from: 3,
+    from: 14,
     values: [
         "5%", "10%", "15%", "20%",
         "25%", "30%", "35%", "40%",
@@ -125,11 +154,20 @@ $('#left_panel_form').on( "submit", function( event ) {
         showLoader(false)
         console.log(json);
         if(json.code == 500) {
-            alert("Server side error")
+            alert("No path found")
         } else {
-            cities = json.city_path
-            cities = cities.map(x => new city(x[0], x[1], x[2]))
-            draw_path(cities);
+            connections = json.connections
+            connections = connections.map(x => new Connection(new city(...x[0]),
+                new city(...x[1]),
+                x[2], x[3], x[4], x[5], x[6]))
+            console.log(connections)
+            console.log(connections[connections.length-1].from_city.lat)
+            center = [(connections[0].to_city.lat + connections[connections.length-1].from_city.lat)/2, (connections[0].to_city.long + connections[connections.length-1].from_city.long)/2]
+            mymap.fitBounds([
+                [connections[0].from_city.lat, connections[0].from_city.long],
+                [connections[connections.length-1].to_city.lat, connections[connections.length-1].to_city.long]
+            ]);
+            draw_path(connections);
         }
     });
 });
@@ -144,5 +182,36 @@ const STOP_API_URL = '/api/v1.0/stops'
 $.get(STOP_API_URL, function(json) {
     city_names = json.stops.sort()
     console.log(json)
-    d3.selectAll('.city_select').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; });
+    //d3.selectAll('.city_select').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; });
+    d3.select('#departure').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; }).property("selected", function(d){ return d === 'Zürich Flughafen, Bahnhof'; })
+    d3.select('#arrival').selectAll('option').data(city_names).enter().append('option').text(function (d) { return d; }).property("selected", function(d){ return d === 'Zürich, ETH/Universitätsspital'; })
 })
+
+
+//legends
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 20, 40, 60, 80, 100],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    div.innerHTML += "<div>Certainty:</div>"
+    for (var i = 0; i < grades.length-1; i++) {
+        div.innerHTML +=
+            '<i style="background:' + d3.interpolateRdYlGn((grades[i] + grades[i + 1])/200) + '"></i> ' +
+            grades[i] + '&ndash;' + grades[i + 1]  + '%<br>';
+    }
+
+    return div;
+};
+
+legend.addTo(mymap);
+
+//defautl values
+d = new Date()
+console.log(d.getHours() + ":" + d.getMinutes())
+document.getElementById("start_date").valueAsDate = d
+document.getElementById("start_time").value = d.getHours() + (d.getMinutes()<10?":0":":") + d.getMinutes()

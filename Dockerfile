@@ -7,6 +7,7 @@ ADD . /app
 ADD pickle /app/pickle
 ADD data/metadata/BFKOORD_GEO /app/data/metadata/BFKOORD_GEO 
 
+
 WORKDIR /app
 
 EXPOSE 5000

@@ -1,7 +1,5 @@
 import folium
 from utils import getLongLat
-from algo import getNearByStation
-
 
 def showStation(stations, markers = []):
     loc = getLongLat('Zürich HB')

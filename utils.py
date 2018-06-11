@@ -28,6 +28,7 @@ def load_all_stops():
 def store_LongLatDict():
     d = createLongLatDict()
     pickle.dump(d, open("pickle/longLatDict.p", "wb" ))
+    
 def load_LongLatDict():
     return pickle.load(open("pickle/longLatDict.p", "rb" ))
 
