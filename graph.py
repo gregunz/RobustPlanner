@@ -7,6 +7,9 @@ from algo import *
 import pickle
 
 class Departure():
+    """
+    Contains all the information about a departure from a station A to a station B
+    """
     departure_time = 0
     arrival_time = 0
     trip_id = ''
@@ -17,32 +20,70 @@ class Departure():
         self.trip_id = trip_id
 
 class ByWalkConnection():
+    """ Represent a Conection where the user walk to the next Station
+    """
     toStation = ""
     distance = 0 #in km
 
-    def __init__(self, stationName, dist):
-        self.toStation = stationName
+    def __init__(self, toStation, dist):
+        """
+        toStation: the station that is connected
+        dist: distance in km
+        """
+        self.toStation = toStation
         self.distance = dist
     
-    def nextDeparture(self, time, current_proba, proba_threshold, df_risk):
-        return Departure(time, time + dist_to_time(self.distance), 'Walk')
+    def nextDeparture(self, time, current_proba, proba_threshold, df_risk, from_trip):
+        """
+        Args:
+            time: datetime when you are at station A
+            current_proba: probability of success before taking that connection
+            proba_threshold: minimum probability of success that must still hold after taking that connection
+            df_risk: Pandas dataFrame needed to compute the probability of failure for each trip
+            from_trip: trip_id from the previous connection
+        =========================================================
+        Return: a tuple (Departure, failure_proba) reprensenting the next departure possible that meet the constraint
+        """
+        return Departure(time, time + dist_to_time(self.distance), 'Walk'), 0.0
 
 class Connection():
+    """ Represent a Conection to a Station B
+    """
     toStation = "" #Station to which we are connected
     departures = [] #(dep_time,arrival_time) assume sorted by arrival time
     
     def __init__(self, stationName, dep):
+        """
+        toStation: the station that is connected
+        dist: distance in km
+        """
         self.toStation = stationName
         self.departures = dep
     
-    def nextDeparture(self, time, current_proba, proba_threshold, df_risk):
+    def nextDeparture(self, time, current_proba, proba_threshold, df_risk, from_trip):
+        """
+        Args:
+            time: datetime when you are at station A
+            current_proba: probability of success before taking that connection
+            proba_threshold: minimum probability of success that must still hold after taking that connection
+            df_risk: Pandas dataFrame needed to compute the probability of failure for each trip
+            from_trip: trip_id from the previous connection
+        =========================================================
+        Return: a tuple (Departure, failure_proba) reprensenting the next departure possible that meet the constraint
+        """
         for dep in self.departures:
-            if dep.departure_time >= time:
-                risk = get_risk(df_risk, [2, dep.trip_id], (dep.departure_time - time).seconds)
-                if proba_threshold < current_proba*(1 - risk):
-                    return dep
+            departure_time = dep.departure_time
+            if dep.trip_id != from_trip:
+                #add a minimal time to make a change
+                departure_time = departure_time - datetime.timedelta(minutes=2)
+            if departure_time >= time:
+                risk = get_risk(df_risk, [2, dep.trip_id], (departure_time - time).seconds)
+                if proba_threshold <= current_proba * (1-risk):
+                    return dep, risk
+        return None, None
     
 class Graph():
+    """ Contains all the travel connection for a given day of the week"""
     stationsConnection = dict() #(String -> connectedStation)
     def __init__(self,stationsConnection):
         self.stationsConnection = stationsConnection
@@ -50,14 +91,25 @@ class Graph():
 
 def dist_to_time(dist, speed=4):
     """
-    dist: Distance in km
-    speed: Speed is in km per hour (kmh)
+    Args:
+        dist: Distance in km
+        speed: Speed is in km per hour (kmh)
+    =====================================
     Return: Time as a delta time object """
     time = dist / speed
     return timedelta(hours=time)
 
 
 def addDepartureToGraph(g, from_station, to_station, departure):
+    """ Insert a Departure into the graph
+    Args:
+        g: Graph representing the network, this object is updated
+        from_station: the station where to add the connection (Departure)
+        to_station: neighbours of from_station 
+        departure: a Departure object
+    ===========================================
+    Return: None (the graph g in updated)
+    """
     if from_station in g.stationsConnection:
         neighbours = g.stationsConnection[from_station]
         neighbours_found = False
@@ -71,9 +123,13 @@ def addDepartureToGraph(g, from_station, to_station, departure):
     else:
         g.stationsConnection[from_station] = [Connection(to_station, [departure])]
 
-def buildGraph(df, allStation = []):
+def buildGraph(df):
     """
-    Create a graph for the whole network or only a subset if the argument allStation is provided
+    Create a graph for the whole network
+    Args:
+        df: a Dataframe containing all the trip in one day
+    =======================
+    Return: A Graph object containing the train/bus connection only (No walking connection)
     """
     g = Graph(dict())
     for name, group in tqdm(df.groupby('TRIP_ID')):
@@ -89,6 +145,16 @@ def buildGraph(df, allStation = []):
     return g
 
 def getNearByStation(station, allStations, tr_station2long, distMax=0.3):
+    """ get the nearby stations that we can reach by walk
+    Args:
+        station: station from which we start
+        allStation: list of all the stations to compare to station
+        tr_station2long: a dict that map a station:str to a pair of (longiture, latitude)
+        distMax: threshold that set the maximal distance from
+    ===============================
+    Return: list of tuple (station, dist) for 
+        stations that are at max distMax of the base station.
+    """
     loc = tr_station2long[station]
     closeStation = []
     for s in allStations:
@@ -99,7 +165,11 @@ def getNearByStation(station, allStations, tr_station2long, distMax=0.3):
     return closeStation
 
 def updateGraphWithWalk(g):
-    """
+    """ Given a graph it adds the walking connection to it
+    Args:
+        g: a Graph object to update
+    =====================
+    Return: None
     WARNING this method should not be call more than once
     """
     tr = load_LongLatDict()
@@ -117,6 +187,12 @@ def updateGraphWithWalk(g):
 
 
 def getGraph():
+    """
+    Return: a precomputed graph without the walk connection
+    """
     return pickle.load(open("pickle/graph.p", "rb" ))
 def getWalkGraph():
+    """
+    Return: a precomputed graph with the walk connection added
+    """
     return pickle.load(open("pickle/graph_walk.p", "rb" ))

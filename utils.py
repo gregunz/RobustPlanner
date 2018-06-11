@@ -4,6 +4,12 @@ from translation import translate
 import pickle
 
 def load_data(file, translated = False):
+    """Load data from the cvs file
+    Args:
+        file: the file path of the csv file
+        translated: a boolean set to True if you want the return dataframe to be translated into english
+    Return: A Pandas dataframe with the correct type for the columns
+    """
     parse_dates = ['BETRIEBSTAG', 'ANKUNFTSZEIT', 'AN_PROGNOSE', "ABFAHRTSZEIT", "AB_PROGNOSE"]
     dtypes = {
         "FAHRT_BEZEICHNER": 'str',
@@ -20,19 +26,30 @@ def load_data(file, translated = False):
         return df
 
 def store_all_stops():
+    """ Save the list of all stations into a pickle file
+    """
     stops = get_all_stops()
     pickle.dump(stops, open("pickle/stops.p", "wb" ))
 def load_all_stops():
+    """Load the list of all stations from the pickle file created by store_all_stops()
+    """
     return pickle.load(open("pickle/stops.p", "rb" ))
 
 def store_LongLatDict():
+    """Save a dict mapping station name to (Longitude, Latitude)
+    """
     d = createLongLatDict()
     pickle.dump(d, open("pickle/longLatDict.p", "wb" ))
-    
+
 def load_LongLatDict():
+    """Load a dict mapping station name to (Longitude, Latitude)
+    """
     return pickle.load(open("pickle/longLatDict.p", "rb" ))
 
 def get_all_stops():
+    """
+    Return: a list the satation name located at less than 10km from Zürich HB
+    """
     metadata_df = load_metadata()
     zurichHB = metadata_df[metadata_df.Remark == "Zürich HB"].iloc[0]
     metadata_df = metadata_df.dropna(subset=['Latitude', 'Longitude'])
@@ -48,6 +65,9 @@ def getLongLat(station):
     return (s1.Latitude,s1.Longitude)
 
 def createLongLatDict():
+    """
+    Return a dict that map a station name to a (Long, Lat) tupple
+    """
     meta_df = load_metadata()
     meta_df.index = meta_df['Remark']
     d = dict()
@@ -56,15 +76,26 @@ def createLongLatDict():
         d[stat] = [s.Latitude,s.Longitude]
     return d
 
-def dist_between_stations(station1, station2):
-    #TODO optimize such that we dont need to read two times the metadata file
-    return geo_dist(getLongLat(station1), getLongLat(station2))
+# def dist_between_stations(station1, station2):
+#     #TODO optimize such that we dont need to read two times the metadata file
+#     return geo_dist(getLongLat(station1), getLongLat(station2))
     
 def filter_zurich_data(df):
+    """
+    Args:
+        df: Dataframe of the connections
+    Return:
+        The same dataframe for stations that are only up to 10km from Zurich HB
+    """
     zurich_stops = get_all_stops()
     return df[df['STOP_STATION_NAME'].isin(zurich_stops)]
 
 def load_metadata():
+    """
+    Open the meta data csv file
+    Return:
+        A pandas Dataframe containing all the metadata info
+    """
     with open("data/metadata/BFKOORD_GEO") as file:
         metadata = file.readlines()
     

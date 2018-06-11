@@ -2,6 +2,8 @@ import folium
 from utils import getLongLat
 
 def showStation(stations, markers = []):
+    """ Show a map with all the stations
+    """
     loc = getLongLat('Zürich HB')
     my_map = folium.Map(location=loc)
     for m in markers:
@@ -18,6 +20,8 @@ def showStation(stations, markers = []):
     return my_map
 
 def showPath(path):
+    """ Show a map with a path draw on it
+    """
     loc = getLongLat('Zürich HB')
     my_map = folium.Map(location=loc)
     p1 = path[:-1]
