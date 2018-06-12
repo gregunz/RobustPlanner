@@ -161,10 +161,10 @@ $('#left_panel_form').on( "submit", function( event ) {
                 x[2], x[3], x[4], x[5], x[6]))
             console.log(connections)
             center = [(connections[0].to_city.lat + connections[connections.length-1].from_city.lat)/2, (connections[0].to_city.long + connections[connections.length-1].from_city.long)/2]
-            mymap.fitBounds([
-                [connections[0].from_city.lat, connections[0].from_city.long],
-                [connections[connections.length-1].to_city.lat, connections[connections.length-1].to_city.long]
-            ]);
+            allStation = [[connections[0].from_city.lat, connections[0].from_city.long]]
+            allStation = allStation.concat(connections.map(x=> [x.to_city.lat, x.to_city.long]))
+            console.log(allStation)
+            mymap.fitBounds(allStation);
             draw_path(connections);
         }
     });
