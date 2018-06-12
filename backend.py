@@ -17,6 +17,7 @@ g = None
 stops = []
 longLat = dict()
 df_risk = None
+risk_cache = None
 
 @app.route('/', methods=['GET'])
 def front_end():
@@ -45,7 +46,7 @@ def get_connections():
 
     connections = []
     try:
-        connections = find_path(g, departure_station, arrival_station, departure_time, df_risk, proba_threshold)
+        connections = find_path(g, departure_station, arrival_station, departure_time, risk_cache, proba_threshold)
     except Exception as e:
         print(e)
         connections = []
@@ -70,6 +71,7 @@ if __name__ == '__main__':
     stops = load_all_stops()
     longLat = load_LongLatDict()
     df_risk = pd.read_pickle('pickle/risk_df2.pkl')
+    risk_cache = pickle.load(open('pickle/risk_cache_0.pickle', "rb" ))
     print("files loaded")
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

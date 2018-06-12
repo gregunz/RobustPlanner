@@ -33,13 +33,13 @@ class ByWalkConnection():
         self.toStation = toStation
         self.distance = dist
     
-    def nextDeparture(self, time, current_proba, proba_threshold, df_risk, from_trip):
+    def nextDeparture(self, time, current_proba, proba_threshold, risk_cache, from_trip):
         """
         Args:
             time: datetime when you are at station A
             current_proba: probability of success before taking that connection
             proba_threshold: minimum probability of success that must still hold after taking that connection
-            df_risk: Pandas dataFrame needed to compute the probability of failure for each trip
+            risk_cache: a datastruct to compute the probability of failure for each trip
             from_trip: trip_id from the previous connection
         =========================================================
         Return: a tuple (Departure, failure_proba) reprensenting the next departure possible that meet the constraint
@@ -60,13 +60,13 @@ class Connection():
         self.toStation = stationName
         self.departures = dep
     
-    def nextDeparture(self, time, current_proba, proba_threshold, df_risk, from_trip):
+    def nextDeparture(self, time, current_proba, proba_threshold, risk_cache, from_trip):
         """
         Args:
             time: datetime when you are at station A
             current_proba: probability of success before taking that connection
             proba_threshold: minimum probability of success that must still hold after taking that connection
-            df_risk: Pandas dataFrame needed to compute the probability of failure for each trip
+            risk_cache: a datastruct to compute the probability of failure for each trip
             from_trip: trip_id from the previous connection
         =========================================================
         Return: a tuple (Departure, failure_proba) reprensenting the next departure possible that meet the constraint
@@ -80,7 +80,7 @@ class Connection():
                 if dep.trip_id == from_trip or from_trip == 'Walk' or from_trip == None:
                     risk = 0.0
                 else:
-                    risk = get_risk(df_risk, [2, from_trip], (departure_time - time).seconds)
+                    risk = get_risk_fast(risk_cache, from_trip, (departure_time - time).seconds)
                 if proba_threshold <= current_proba * (1-risk):
                     return dep, risk
         return None, None

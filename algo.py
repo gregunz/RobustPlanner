@@ -22,26 +22,44 @@ class Station:
         self.success_proba = success_proba
         self.cumul_success_prob = cumul_success_prob
 
-def get_risk(risk_df, row, seconds):
+#def get_certainty_sbb(time_delta, trip_id):
+#    return 1 - get_risk(risk_cache_0, trip_id=trip_id, seconds=time_delta)
+
+def get_risk_fast(risk_cache, trip_id, seconds):
     """
-    risk_df: Pandas dataframe containing the information of retard
-    row: a list of size 2 [dayOfTheWeek, trip_id]
+    risk_cache: a datastruct containing the information of delays
+    trip_id: trip on which to compute the probability of delay
     seconds: Time you have to take that connection 
     Return the risk in percentage that a the trip is late by the given amount of seconds
     """
-    ecdf = risk_df.loc[row[0], row[1]]
-    ext = np.extract(ecdf.index >= seconds, ecdf)
-    if len(ext) == 0:
-        return 0
-    return ext[0]
+    trip_id = trip_id.replace('"', '').replace('\'', '') #safety check
+    r = 0
+    for idx, risk in risk_cache[trip_id]:
+        if idx >= seconds:
+            return risk
+    return r
 
-def find_path(g, start_station, end_station, departure_time, df_risk, proba_threshold=0.65):
+
+# def get_risk(risk_df, row, seconds):
+#     """
+#     risk_df: Pandas dataframe containing the information of retard
+#     row: a list of size 2 [dayOfTheWeek, trip_id]
+#     seconds: Time you have to take that connection 
+#     Return the risk in percentage that a the trip is late by the given amount of seconds
+#     """
+#     ecdf = risk_df.loc[row[0], row[1]]
+#     ext = np.extract(ecdf.index >= seconds, ecdf)
+#     if len(ext) == 0:
+#         return 0
+#     return ext[0]
+
+def find_path(g, start_station, end_station, departure_time, risk_cache, proba_threshold=0.65):
     """
     g: a Graph object
     start_station: a String representing the Station where you want to start from
     end_station: The satation where you wanna go
     departure_time: time at which you wanna start your journey (usually now)
-    df_risk: Pandas dataFrame needed to compute the probability of failure for each trip
+    risk_cache: a datastruct to compute the probability of failure for each trip
     proba_threshold: Minimal success probability that is allow to be returned
 
     Return: list of Connection from start_station to end_station that satisfy 
@@ -58,7 +76,7 @@ def find_path(g, start_station, end_station, departure_time, df_risk, proba_thre
         if s in g.stationsConnection:
             allConnection = g.stationsConnection[s]
             for c in allConnection:
-                dep, risk = c.nextDeparture(time, proba, proba_threshold, df_risk, from_trip)
+                dep, risk = c.nextDeparture(time, proba, proba_threshold, risk_cache, from_trip)
                 if dep is not None:
                     #Penalize path where we walk a lot (more than two consecutive times)
                     if from_trip == 'Walk' and dep.trip_id == 'Walk':
