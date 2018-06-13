@@ -78,23 +78,29 @@
                 table-layout: fixed; /*Optional*/
                 border-spacing: 10px;">
               <div style="display: table-cell;">
-                <input type="radio" name="speed" value="1"> Couch potato </input>
+                <input type="radio" name="speed" value="2"> Couch potato </input>
               </div>
               <div style="display: table-cell;">
-                <input type="radio" name="speed" value="2" checked> Normal </input>
+                <input type="radio" name="speed" value="4" checked> Normal </input>
               </div>
               <div style="display: table-cell;">
-                <input type="radio" name="speed" value="3"> Sporty </input>
+                <input type="radio" name="speed" value="8"> Sporty </input>
               </div>
             </div>
           </div>
 
-
-
           <div class="form-group">
             <label for="duration_slider" control-label>Proposed connections:</label>
-            <div class="trip">
-              From A to B
+            <div style="max-height: 100px; overflow: scroll;">
+              <ul id="trips">
+                <li v-for="(trip, index) in trips" 
+                  @click="show(index,trip)"
+                  v-bind:class="{ selected: selectedIndex == index}">
+                  <div>
+                    {{trip.name}}
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
 

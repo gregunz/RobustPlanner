@@ -110,3 +110,22 @@
     height: 5em;
   }
 }
+
+li {
+  padding: 10px;
+  overflow: auto;
+}
+
+.selected {
+  background:  #eee;
+}
+
+li:hover {
+  filter: opacity(50%);
+  cursor: pointer;
+}
+
+ul {
+  padding: 0px;
+}
+

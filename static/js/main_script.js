@@ -33,18 +33,17 @@ class Connection {
     }
 }
 
-// let train_path_data;
+class Trip {
+    constructor(connections, duration, name) {
+        this.connections = connections
+        this.duration = duration
+        this.name = name
+    }
+}
 
-// function loadTrainPath(CSV) {
-//     train_path_data = CSV;
-// }
 
-// function getTrain_Path(trainline) {
-//   train_path = train_path_data.filter(x => x.route_number == trainline)
-//   return train_path.geoshape
-// }
-
-function draw_path(path) {
+function draw_trip(trip) {
+    path = trip.connections
   let i = 0;
   clearMap(mymap);
   draw_marker(path[0].from_city, path[0].departure_time);
@@ -57,6 +56,11 @@ function draw_path(path) {
     path[path.length-1].arrival_time + '<br>Proba of success: ' + 
     path[path.length-1].proba_cumul);
   update_graph();
+  
+    //center the map
+    allStation = [[path[0].from_city.lat, path[0].from_city.long]]
+    allStation = allStation.concat(path.map(x=> [x.to_city.lat, x.to_city.long]))
+    mymap.fitBounds(allStation);
 }
 
 function draw_point(city) {
@@ -155,17 +159,15 @@ $('#left_panel_form').on( "submit", function( event ) {
         if(json.code == 500) {
             alert("No path found")
         } else {
-            connections = json.connections
-            connections = connections.map(x => new Connection(new city(...x[0]),
+            console.log(json)
+            allTrips = json.trips.map(trip => new Trip(
+                trip[0].map(x => new Connection(new city(...x[0]),
                 new city(...x[1]),
-                x[2], x[3], x[4], x[5], x[6]))
-            console.log(connections)
-            center = [(connections[0].to_city.lat + connections[connections.length-1].from_city.lat)/2, (connections[0].to_city.long + connections[connections.length-1].from_city.long)/2]
-            allStation = [[connections[0].from_city.lat, connections[0].from_city.long]]
-            allStation = allStation.concat(connections.map(x=> [x.to_city.lat, x.to_city.long]))
-            console.log(allStation)
-            mymap.fitBounds(allStation);
-            draw_path(connections);
+                x[2], x[3], x[4], x[5], x[6])), trip[1], trip[2])
+            )
+            Vue.set(tripList,'trips', allTrips)
+            //console.log(connections)
+            draw_trip(allTrips[0]);
         }
     });
 });
@@ -213,3 +215,19 @@ legend.addTo(mymap);
 d = new Date()
 document.getElementById("start_date").valueAsDate = d
 document.getElementById("start_time").value = d.getHours() + (d.getMinutes()<10?":0":":") + d.getMinutes()
+
+
+//VueJs
+var tripList = new Vue({
+    el: '#trips',
+    data: {
+        trips: [],
+        selectedIndex: 0
+    },
+    methods: {
+        show: function(index, trip) {
+            this.selectedIndex = index
+            draw_trip(trip)
+        }
+    }
+  })
