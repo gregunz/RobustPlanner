@@ -1,17 +1,10 @@
 #!/usr/bin/env python
-from flask import Flask, jsonify, request
-import numpy as np
 import os
-import pickle
-import datetime
 
-from algo import *
-from translation import *
-from utils import *
-from visualisation import *
+from flask import Flask, jsonify, request
+
 from graph import *
 from run_csa_sbb import run as run_csa, all_stations
-
 
 app = Flask(__name__)
 
@@ -79,7 +72,7 @@ def get_connections():
 
     speed = 4
 
-    top_n = 1
+    top_n = 5
 
     csa_sbb = run_csa(
         departure_station=departure_station,
@@ -119,7 +112,7 @@ def get_connections():
         }
     else:
         res = {
-            'connections': [path_to_output(p) for p in paths][0],
+            'connections': [path_to_output(p) for p in paths],
             'code': 200
         }
 
@@ -131,12 +124,10 @@ def get_connections():
 
 
 if __name__ == '__main__':
-    #load graph
     print("Loading some files....")
     g = getWalkGraph()
-    stops = all_stations#load_all_stops()
+    stops = all_stations
     longLat = load_LongLatDict()
-    #df_risk = pd.read_pickle('pickle/risk_df2.pkl')
     risk_cache = pickle.load(open('pickle/risk_cache.pickle', "rb" ))
     print("files loaded")
     port = int(os.environ.get("PORT", 5000))
