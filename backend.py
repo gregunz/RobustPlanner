@@ -74,8 +74,16 @@ def get_connections():
             edge['cum_certainty']
         ]
 
-    def path_to_output(path):
-        return [edge_to_output(e) for e in path.edges()]
+
+    def path_to_output(path, i):
+        path_duration = int(np.sum([e['duration'] for e in path.edges()]) / 60 * 100) / 100
+        path_certainty = int(path.last()['cum_certainty'] * 100) / 100
+        path_name = "[path #{}] in {} minutes with {} certainty".format(i+1, path_duration, path_certainty)
+        return [
+            [edge_to_output(e) for e in path.edges()],
+            path_duration,
+            path_name
+        ]
 
     if len(paths) == 0:
         res = {
@@ -83,7 +91,7 @@ def get_connections():
         }
     else:
         res = {
-            'connections': [path_to_output(p) for p in paths],
+            'trips': [path_to_output(p, i) for i, p in enumerate(paths)],
             'code': 200
         }
 
