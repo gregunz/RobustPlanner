@@ -30,35 +30,6 @@ def get_stops():
     }
     return jsonify(res)
 
-@app.route('/api/v1.0/connections_old', methods=['GET'])
-def get_connections_old():
-    start_time = request.args.get('start_time')
-    start_date = request.args.get('start_date')
-    start_date = '2017-09-13' #TODO later to be removed
-    departure_time = start_date + " " + start_time
-    departure_time = pd.to_datetime(departure_time)
-    departure_station = request.args.get('departure')
-    arrival_station = request.args.get('arrival')
-    proba_threshold = request.args.get('certainty')
-    proba_threshold = int(proba_threshold[:-1])/100
-
-    connections = []
-    try:
-        connections = find_path(g, departure_station, arrival_station, departure_time, risk_cache[0], proba_threshold)
-    except Exception as e:
-        print(e)
-        connections = []
-    
-    connections = connections[::-1]
-    connections = [e for e in map(lambda x: [cityFlatten(x[0]), cityFlatten(x[1]), x[2], x[3], x[4], x[5], x[6]] , connections)]
-
-    res = {
-        'connections': connections,
-        'code': 500 if connections == [] else 200 
-    }
-
-    return jsonify(res)
-
 
 @app.route('/api/v1.0/connections', methods=['GET'])
 def get_connections():
@@ -86,12 +57,12 @@ def get_connections():
     paths = csa_sbb.get_paths()
 
     def edge_to_output(edge):
-        start_datetime = pd.to_datetime(start_date).date()
+        date_of_departure = departure_timestamp.date()
         departure_time = datetime.datetime.fromtimestamp(edge['departure_ts']).time()
-        departure_time = datetime.datetime.combine(start_datetime, departure_time)
+        departure_time = datetime.datetime.combine(date_of_departure, departure_time)
 
         arrival_time = datetime.datetime.fromtimestamp(edge['arrival_ts']).time()
-        arrival_time = datetime.datetime.combine(start_datetime, arrival_time)
+        arrival_time = datetime.datetime.combine(date_of_departure, arrival_time)
 
         return [
             cityFlatten(edge['departure_station']),
@@ -119,8 +90,34 @@ def get_connections():
     return jsonify(res)
 
 
+@app.route('/api/v1.0/connections_dijkstra', methods=['GET'])
+def get_connections_dijkstra():
+    start_time = request.args.get('start_time')
+    start_date = request.args.get('start_date')
+    start_date = '2017-09-13' #TODO later to be removed
+    departure_time = start_date + " " + start_time
+    departure_time = pd.to_datetime(departure_time)
+    departure_station = request.args.get('departure')
+    arrival_station = request.args.get('arrival')
+    proba_threshold = request.args.get('certainty')
+    proba_threshold = int(proba_threshold[:-1])/100
 
+    connections = []
+    try:
+        connections = find_path(g, departure_station, arrival_station, departure_time, risk_cache[0], proba_threshold)
+    except Exception as e:
+        print(e)
+        connections = []
+    
+    connections = connections[::-1]
+    connections = [e for e in map(lambda x: [cityFlatten(x[0]), cityFlatten(x[1]), x[2], x[3], x[4], x[5], x[6]] , connections)]
 
+    res = {
+        'connections': connections,
+        'code': 500 if connections == [] else 200 
+    }
+
+    return jsonify(res)
 
 
 if __name__ == '__main__':
