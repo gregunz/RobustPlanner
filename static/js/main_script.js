@@ -157,7 +157,7 @@ $('#left_panel_form').on( "submit", function( event ) {
     $.get('/api/v1.0/connections', params, function(json) {
         showLoader(false)
         if(json.code == 500) {
-            alert("No path found")
+            swal ( "Oops" ,  "No connections found, check the time!" ,  "error" )
         } else {
             console.log(json)
             allTrips = json.trips.map(trip => new Trip(

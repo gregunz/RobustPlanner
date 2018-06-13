@@ -40,9 +40,7 @@ def get_connections():
     departure_timestamp = pd.to_datetime(start_date + " " + start_time).timestamp()
     certainty = request.args.get('certainty')
     certainty = int(certainty[:-1])/100
-
-    speed = 4
-
+    speed = int(request.args.get('speed'))
     top_n = 5
 
     csa_sbb = run_csa(

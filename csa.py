@@ -44,14 +44,17 @@ class History:
 
     def edges(self):
         edges = []
+        certainty = None
         for dep, arr in zip(self.hist[:-1], self.hist[1:]):
+            if certainty is None or dep['trip_id'] != arr['trip_id']:
+                certainty = arr['cum_certainty'] / dep['cum_certainty']
             d = {
                 'departure_station': dep['station'],
                 'arrival_station': arr['station'],
                 'departure_ts': dep['arr_ts'],
                 'arrival_ts': arr['arr_ts'],
                 'duration': arr['arr_ts'] - dep['arr_ts'],
-                'certainty': arr['cum_certainty'] / dep['cum_certainty'],
+                'certainty': certainty,
                 'cum_certainty': dep['cum_certainty'],
                 'departure_cum_certainty': arr['cum_certainty'],
                 'trip_id': arr['trip_id'],
