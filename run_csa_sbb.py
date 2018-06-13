@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 from tqdm import tqdm_notebook as tqdm
 tqdm.monitor_interval = 0
 
@@ -8,7 +6,7 @@ import pickle
 
 from csa import CSA, Connection
 from graph import dist_to_time
-from csa_utils import get_connections_per_day, to_departure_time_stamp
+from csa_utils import to_departure_time_stamp
 
 print(__name__ + ' loading...')
     
@@ -70,7 +68,7 @@ def run(
     
     # Then we add the remaining connections of all the stations 
     # (will add future walking connections on the fly as well)
-    for con in tqdm(connections_sbb[day]):
+    for con in connections_sbb[day]:
         csa_sbb.add_connection(con)
 
     return csa_sbb
