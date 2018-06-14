@@ -11,6 +11,9 @@ class Connection:
         self.arr_ts = arr_ts
         self.trip_id = trip_id
 
+    def get_duration(self):
+        return self.arr_ts - self.dep_ts
+
     def __lt__(self, other):
         return self.dep_ts < other.dep_ts
 
@@ -19,22 +22,23 @@ class Connection:
             .format(self.dep_station, self.arr_station, self.dep_ts, self.arr_ts, self.trip_id, self.trip_id)
 
 class History:
-    def __init__(self, station, arr_ts, cum_certainty, trip_id):
-        d = self.to_dict(station, arr_ts, cum_certainty, trip_id)
+    def __init__(self, station, arr_ts, duration, cum_certainty, trip_id):
+        d = self.to_dict(station, arr_ts, duration, cum_certainty, trip_id)
         self.hist = [d]
-        
+
     def copy(self):
         new_hist = copy(self)
         new_hist.hist = self.hist.copy()
         return new_hist
 
-    def add(self, station, arr_ts, cum_certainty, trip_id):
-        self.hist.append(self.to_dict(station, arr_ts, cum_certainty, trip_id))
+    def add(self, station, arr_ts, duration, cum_certainty, trip_id):
+        self.hist.append(self.to_dict(station, arr_ts, duration, cum_certainty, trip_id))
 
-    def to_dict(self, station, arr_ts, cum_certainty, trip_id):
+    def to_dict(self, station, arr_ts, duration, cum_certainty, trip_id):
         return {
             'station': station,
             'arr_ts': arr_ts,
+            'duration': duration,
             'cum_certainty': cum_certainty,
             'trip_id': trip_id,
         }
@@ -53,7 +57,7 @@ class History:
                 'arrival_station': arr['station'],
                 'departure_ts': dep['arr_ts'],
                 'arrival_ts': arr['arr_ts'],
-                'duration': arr['arr_ts'] - dep['arr_ts'],
+                'duration': arr['duration'],
                 'certainty': certainty,
                 'cum_certainty': dep['cum_certainty'],
                 'departure_cum_certainty': arr['cum_certainty'],
@@ -65,28 +69,29 @@ class History:
 
 
 class OneWay:
-    def __init__(self, arr_station, arr_ts, cum_certainty, trip_id):
+    def __init__(self, arr_station, arr_ts, duration, cum_certainty, trip_id):
         self.arr_station = arr_station
         self.arr_ts = arr_ts
+        self.duration = duration
         self.cum_certainty = cum_certainty
-        self.hist = History(arr_station, arr_ts, cum_certainty, trip_id)
+        self.hist = History(arr_station, arr_ts, duration, cum_certainty, trip_id)
 
     def copy(self):
         new_way = copy(self)
         new_way.hist = self.hist.copy()
         return new_way
-        
-    def add(self, arr_station, arr_ts, cum_certainty, trip_id):
+
+    def add(self, arr_station, arr_ts, duration, cum_certainty, trip_id):
         self.arr_ts = arr_ts
         self.cum_certainty = cum_certainty
-        self.hist.add(arr_station, arr_ts, cum_certainty, trip_id)
+        self.hist.add(arr_station, arr_ts, duration, cum_certainty, trip_id)
 
     def last_trip_id(self):
         for h in self.hist.hist[::-1]:
             if h['trip_id'] != 'walking':
                 return h['trip_id']
         print('something wrong occured')
-        
+
     def is_faster(self, other):
         return self.arr_ts < other.arr_ts
 
@@ -119,9 +124,11 @@ class Trajectory:
                 prev_w = w
 
         self.ways = new_ways
-        
+
     def ts_to_beat(self, keep_n):
-        if len(self.ways) < keep_n:
+        if len(self.ways) > 0 and len([w for w in self.ways if w.cum_certainty == 1]) > 0:
+            return [w for w in self.ways if w.cum_certainty == 1][0].arr_ts
+        elif len(self.ways) < keep_n:
             return 2e30
         else:
             return self.ways[keep_n - 1].arr_ts
@@ -133,15 +140,17 @@ class CSA:
         self.dep_station = dep_station
         self.arr_station = arr_station
         self.dep_ts = dep_ts
+        self.real_dep_ts = None
         self.min_certainty = min_certainty
-        self.best_trajectories = {dep_station: Trajectory(OneWay(dep_station, dep_ts, 1, 'start'))}
+        self.best_trajectories = {dep_station: Trajectory(OneWay(dep_station, dep_ts, 0, 1, 'start'))}
         self.get_certainty = get_certainty
         self.get_nearby_connections = get_nearby_connections
         self.keep_n = keep_n
 
     def add_connection(self, con, add_walking = True):
         add_walking = add_walking and con.trip_id != 'walking'
-        if con.dep_station in self.best_trajectories and con.arr_ts - self.dep_ts < 3 * 3600:
+        if con.dep_station in self.best_trajectories\
+            and (self.real_dep_ts is None or con.arr_ts - self.real_dep_ts < 3 * 3600):
             dep_traj = self.best_trajectories[con.dep_station]
             if con.arr_station in self.best_trajectories and con.arr_station != self.arr_station:
                 time_to_beat = self.best_trajectories[con.arr_station].ts_to_beat(self.keep_n)
@@ -157,8 +166,12 @@ class CSA:
                                 and con.trip_id != 'walking':
                             new_cum_certainty *= self.get_certainty(time_delta, prev_way.last_trip_id())
                         if new_cum_certainty >= self.min_certainty:
+                            if con.dep_station == self.dep_station:
+                                prev_way.arr_ts = con.dep_ts
+                                if self.real_dep_ts is None and con.trip_id != 'walking':
+                                    self.real_dep_ts = con.dep_ts
                             new_way = prev_way.copy()
-                            new_way.add(con.arr_station, con.arr_ts, new_cum_certainty, con.trip_id)
+                            new_way.add(con.arr_station, con.arr_ts, con.get_duration(), new_cum_certainty, con.trip_id)
                             if con.arr_station not in self.best_trajectories:
                                 self.best_trajectories[con.arr_station] = Trajectory(new_way)
                                 if add_walking:
@@ -167,12 +180,12 @@ class CSA:
                                 if new_way.is_faster(self.best_trajectories[con.arr_station].ways[0]) and add_walking:
                                     self.__add_walk_cons(con.arr_station, con.arr_ts)
                                 self.best_trajectories[con.arr_station].update(new_way, self.keep_n)
-    
+
     def __add_walk_cons(self, dep_station, dep_ts):
         nearby_cons = self.get_nearby_connections(dep_station, dep_ts)
         for c in nearby_cons:
             self.add_connection(c)
-    
+
     def get_ways(self, station=None):
         if station is None:
             station = self.arr_station

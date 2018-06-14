@@ -46,15 +46,13 @@ function draw_trip(trip) {
     path = trip.connections
   let i = 0;
   clearMap(mymap);
-  draw_marker(path[0].from_city, path[0].departure_time);
+  draw_marker(path[0].from_city, "");
   while(i < path.length) {
     //draw_marker(path[i]);
     create_line(path[i]);
     i = i + 1;
   }
-  draw_marker(path[path.length-1].to_city, 
-    path[path.length-1].arrival_time + '<br>Proba of success: ' + 
-    path[path.length-1].proba_cumul);
+  draw_marker(path[path.length-1].to_city, path[path.length-1].arrival_time);
   update_graph();
   
     //center the map
@@ -157,7 +155,7 @@ $('#left_panel_form').on( "submit", function( event ) {
     $.get('/api/v1.0/connections', params, function(json) {
         showLoader(false)
         if(json.code == 500) {
-            swal ( "Oops" ,  "No connections found, check the time!" ,  "error" )
+            swal ( "Oops" ,  "No connections found :( !" ,  "error" )
         } else {
             console.log(json)
             allTrips = json.trips.map(trip => new Trip(

@@ -14,7 +14,7 @@ risk_cache = pickle.load(open('pickle/risk_cache.pickle', 'rb'))
 
 nearby_stations_and_dist_cache = pickle.load(open('pickle/nearby_stations_and_dist.pickle', 'rb'))
 
-connections_sbb = connections_sbb = pickle.load(open('pickle/connections.pickle', 'rb')) #get_connections_per_day()
+connections_sbb = pickle.load(open('pickle/connections.pickle', 'rb')) #get_connections_per_day()
 
 all_stations = sorted(list(set([c.dep_station for day in range(7) for c in connections_sbb[day]])))
 
@@ -25,7 +25,8 @@ def run(
     departure_timestamp,
     min_certainty,
     speed,
-    top_n
+    top_n,
+    with_tqdm = True
 ):
     
     day = datetime.datetime.fromtimestamp(departure_timestamp).weekday()
@@ -68,7 +69,12 @@ def run(
     
     # Then we add the remaining connections of all the stations 
     # (will add future walking connections on the fly as well)
-    for con in connections_sbb[day]:
-        csa_sbb.add_connection(con)
+    if with_tqdm:
+        for con in tqdm(connections_sbb[day]):
+            csa_sbb.add_connection(con)
+    else:
+        for con in connections_sbb[day]:
+            csa_sbb.add_connection(con)
+
 
     return csa_sbb
