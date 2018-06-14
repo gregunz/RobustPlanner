@@ -46,6 +46,16 @@ class History:
     def last(self):
         return self.hist[-1]
 
+    def duration(self):
+        edges = self.edges()
+        first_non_walking_edges = [i for i, e in enumerate(edges) if e['trip_id'] != 'walking']
+        start_index = 0 if len(first_non_walking_edges) == 0 else first_non_walking_edges[0]
+        real_dep_time = edges[start_index]['arrival_ts'] - edges[start_index]['duration']
+        if start_index > 0:
+            real_dep_time -= edges[0]['duration']
+        path_duration = edges[-1]['arrival_ts'] - real_dep_time
+        return path_duration
+
     def edges(self):
         edges = []
         certainty = None
@@ -93,7 +103,7 @@ class OneWay:
         print('something wrong occured')
 
     def is_faster(self, other):
-        return self.arr_ts < other.arr_ts
+        return self.hist.duration() < other.hist.duration()
 
     def is_safer(self, other):
         return self.cum_certainty > other.cum_certainty

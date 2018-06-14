@@ -89,18 +89,19 @@ def get_connections():
 
 
     def path_to_output(path, i):
-        first_non_walking_edges = [i for i, e in enumerate(path.edges()) if e['trip_id'] != 'walking']
+        edges = path.edges()
+        first_non_walking_edges = [i for i, e in enumerate(edges) if e['trip_id'] != 'walking']
         start_index = 0 if len(first_non_walking_edges) == 0 else first_non_walking_edges[0]
-        real_dep_time = path.edges()[start_index]['arrival_ts'] - path.edges()[start_index]['duration']
+        real_dep_time = edges[start_index]['arrival_ts'] - edges[start_index]['duration']
         if start_index > 0:
-            real_dep_time -= path.edges()[0]['duration']
-        path_duration = path.edges()[-1]['arrival_ts'] - real_dep_time
+            real_dep_time -= edges[0]['duration']
+        path_duration = edges[-1]['arrival_ts'] - real_dep_time
         path_duration = int(path_duration / 60 * 100) / 100
         path_certainty = int(path.last()['cum_certainty'] * 1000) / 10
         path_starting_time = datetime.datetime.fromtimestamp(real_dep_time).strftime('%H:%M')
         path_name = "[#{} at {}] in {} minutes with {}% certainty".format(i+1, path_starting_time, path_duration, path_certainty)
         return [
-            [edge_to_output(e) for e in path.edges()],
+            [edge_to_output(e) for e in edges],
             path_duration,
             path_name
         ]
