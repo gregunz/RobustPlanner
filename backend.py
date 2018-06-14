@@ -64,7 +64,7 @@ def get_connections():
         )
         csa_cache[key] = csa_sbb
 
-    paths = csa_sbb.get_paths()
+    paths = csa_sbb.get_paths(arrival_station)
 
     def edge_to_output(edge):
         start_datetime = pd.to_datetime(start_date).date()
