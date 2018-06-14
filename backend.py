@@ -92,10 +92,10 @@ def get_connections():
         if start_index > 0:
             real_dep_time -= path.edges()[0]['duration']
         path_duration = path.edges()[-1]['arrival_ts'] - real_dep_time
-        path_duration = int(path_duration / 60 * 1000) / 1000
-        path_certainty = int(path.last()['cum_certainty'] * 1000) / 1000
+        path_duration = int(path_duration / 60 * 100) / 100
+        path_certainty = int(path.last()['cum_certainty'] * 1000) / 10
         path_starting_time = datetime.datetime.fromtimestamp(real_dep_time).strftime('%H:%M')
-        path_name = "[#{} at {}] in {} minutes with {} certainty".format(i+1, path_starting_time, path_duration, path_certainty)
+        path_name = "[#{} at {}] in {} minutes with {}% certainty".format(i+1, path_starting_time, path_duration, path_certainty)
         return [
             [edge_to_output(e) for e in path.edges()],
             path_duration,
