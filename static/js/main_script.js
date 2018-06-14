@@ -22,7 +22,7 @@ class city {
     }
 }
 class Connection {
-    constructor(from_city, to_city, departure_time, arrival_time, trip_id, proba, proba_cumul) {
+    constructor(from_city, to_city, departure_time, arrival_time, trip_id, proba, proba_cumul, duration) {
         this.from_city = from_city;
         this.to_city = to_city;
         this.departure_time = departure_time;
@@ -30,33 +30,65 @@ class Connection {
         this.proba = proba;
         this.proba_cumul = proba_cumul;
         this.trip_id = trip_id;
+        this.duration = duration
     }
 }
 
 class Trip {
     constructor(connections, duration, name) {
-        this.connections = connections
-        this.duration = duration
+        this.connections = connections;
+        this.duration = duration;
         this.name = name
     }
 }
 
 
 function draw_trip(trip) {
-    path = trip.connections
-    let i = 0;
+    path = trip.connections;
     clearMap(mymap);
-    draw_marker(path[0].from_city, "");
-    while(i < path.length) {
-        //draw_marker(path[i]);
+
+    let trip_id = path[0].trip_id;
+    let starting_time = path[0].departure_time;
+
+    if (trip_id === 'Walk'){
+        starting_time = new Date(Date.parse(path[1].arrival_time));
+        starting_time.setMinutes(starting_time.getMinutes() - Math.ceil(path[0].duration / 60 + path[1].duration / 60));
+        starting_time = starting_time.toGMTString();
+    }
+
+    draw_marker(path[0].from_city, "Starting at: " + starting_time);
+
+    let i = 0;
+    while(i < path.length - 1) {
+        console.log(i, path[i]);
+        if (path[i + 1].trip_id !== trip_id){
+            trip_id = path[i + 1].trip_id;
+            let arrival_time = path[i].arrival_time;
+            if(i === 0 && path[0].trip_id === 'Walk'){
+                arrival_time = new Date(Date.parse(path[1].arrival_time));
+                arrival_time.setMinutes( arrival_time.getMinutes() - Math.ceil(path[1].duration / 60));
+                arrival_time = arrival_time.toGMTString();
+            }
+            let leaving_time = arrival_time;
+            if(trip_id !== 'Walk'){
+                leaving_time = new Date(Date.parse(path[i + 1].arrival_time));
+                leaving_time.setMinutes( leaving_time.getMinutes() - Math.floor(path[i + 1].duration / 60) );
+                leaving_time = leaving_time.toGMTString();
+            }
+
+             const text = "Arrived at: " + arrival_time + "<br>" +
+                "Leaving at: " + leaving_time;
+            draw_marker(path[i].to_city, text);
+        }
         create_line(path[i]);
         i = i + 1;
     }
+    create_line(path[path.length-1]);
     draw_marker(path[path.length-1].to_city, path[path.length-1].arrival_time);
     update_graph();
 
     //center the map
-    allStation = [[path[0].from_city.lat, path[0].from_city.long]]
+    allStation = [[path[0].from_city.lat, path[0].from_city.long]];
     allStation = allStation.concat(path.map(x=> [x.to_city.lat, x.to_city.long]))
     mymap.fitBounds(allStation);
 }
@@ -82,8 +114,8 @@ let myLines = [];
 let myMarkers = [];
 
 function create_line(connection) {
-    city1 = connection.from_city
-    city2 = connection.to_city
+    city1 = connection.from_city;
+    city2 = connection.to_city;
     myLines.push({
         'type': 'LineString',
         'coordinates': [[city1.long, city1.lat], [city2.long, city2.lat]],
@@ -161,7 +193,7 @@ $('#left_panel_form').on( "submit", function( event ) {
             allTrips = json.trips.map(trip => new Trip(
                 trip[0].map(x => new Connection(new city(...x[0]),
                 new city(...x[1]),
-                x[2], x[3], x[4], x[5], x[6])), trip[1], trip[2])
+                x[2], x[3], x[4], x[5], x[6], x[7])), trip[1], trip[2])
         )
             Vue.set(tripList,'trips', allTrips);
             //console.log(connections)
