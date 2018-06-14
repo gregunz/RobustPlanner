@@ -283,7 +283,8 @@ $(document).ready(function () {
         " With Robust Planner your dreams become reality!\n\n" +
         "notes: \n" +
         "- click on markers for details\n" +
-        "- the top 5 journeys satifying your criterias will be computed",
+        "- the top 5 journeys satifying your criterias will be computed\n" +
+        "- project in beta (works better on Chrome and Firefox",
         button: "Let's get started",
     });
 });
