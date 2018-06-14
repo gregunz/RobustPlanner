@@ -137,7 +137,7 @@ ul {
   }
 
   .col-4 {
-    overflow: scroll;
+    overflow: auto;
   }
 
   .col-8 {
@@ -149,6 +149,14 @@ ul {
 }
 .form-group {
   margin-bottom: 5px;
+}
+
+h4 {
+  padding-top: 10px;
+}
+
+form {
+  padding-bottom: 10px;
 }
 
 @media only screen and (max-width: 600px) {

@@ -91,7 +91,7 @@
 
           <div class="form-group">
             <label for="duration_slider" control-label>Proposed connections:</label>
-            <div style="max-height: 150px; overflow: scroll;">
+            <div style="max-height: 150px; overflow: auto;">
               <ul id="trips">
                 <li v-for="(trip, index) in trips" 
                   @click="show(index,trip)"
@@ -104,8 +104,14 @@
             </div>
           </div>
 
-          <button type="submit" id="submit_button" class="btn btn-danger btn-block">Let's travel!</button>
+          <button type="submit" id="submit_button" class="btn btn-danger btn-block">Let's travel !</button>
         </form>
+
+        <div id="buy-tickets-btn">
+          <button type="submit" class="btn btn-danger btn-block" onclick="buy_tickets()">
+            Buy Tickets
+          </button>
+        </div>
 
       </div>
       <div class="col-8">
