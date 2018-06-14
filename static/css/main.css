@@ -32,7 +32,7 @@
 #loader-overlay {
     background: #0000003a;
     z-index: 9999;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -63,7 +63,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  position: absolute;
+  position: fixed;
   margin: auto;
   font-size: 11px;
   -webkit-transform: translateZ(0);
@@ -74,7 +74,7 @@
 }
 .loader:before,
 .loader:after {
-  position: absolute;
+  position: fixed;
   top: 0;
   content: '';
 }
