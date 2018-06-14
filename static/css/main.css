@@ -129,6 +129,22 @@ ul {
   padding: 0px;
 }
 
+
+@media only screen and (min-width: 601px) {
+
+  #main_container, .row, .col-4, .col-8 {
+    max-height: 100%;
+  }
+
+  .col-4 {
+    overflow: scroll;
+  }
+
+  .col-8 {
+    padding-left: 0;
+  }
+}
+
 @media only screen and (max-width: 600px) {
   .col-4 {
     -webkit-box-flex: 0;
