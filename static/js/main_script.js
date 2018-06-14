@@ -284,7 +284,7 @@ $(document).ready(function () {
         "notes: \n" +
         "- click on markers for details\n" +
         "- the top 5 journeys satifying your criterias will be computed\n" +
-        "- project in beta (works better on Chrome and Firefox",
+        "- project in beta (works better on Chrome and Firefox)",
         button: "Let's get started",
     });
 });
