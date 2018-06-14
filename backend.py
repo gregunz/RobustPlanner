@@ -67,12 +67,15 @@ def get_connections():
     paths = csa_sbb.get_paths(arrival_station)
 
     def edge_to_output(edge):
-        start_datetime = pd.to_datetime(start_date).date()
+        start_datetime = datetime.datetime.fromtimestamp(departure_timestamp)
         departure_time = datetime.datetime.fromtimestamp(edge['departure_ts']).time()
-        departure_time = datetime.datetime.combine(start_datetime, departure_time)
+        departure_time = datetime.datetime.combine(start_datetime.date(), departure_time)
 
         arrival_time = datetime.datetime.fromtimestamp(edge['arrival_ts']).time()
-        arrival_time = datetime.datetime.combine(start_datetime, arrival_time)
+        arrival_datetime = start_datetime
+        if start_datetime.time() > arrival_time:
+            arrival_datetime += timedelta(days=1)
+        arrival_time = datetime.datetime.combine(arrival_datetime.date(), arrival_time)
 
         return [
             cityFlatten(edge['departure_station']),
