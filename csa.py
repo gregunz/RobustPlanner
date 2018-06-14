@@ -152,7 +152,7 @@ class CSA:
         if con.dep_station in self.best_trajectories\
             and (self.real_dep_ts is None or con.arr_ts - self.real_dep_ts < 3 * 3600):
             dep_traj = self.best_trajectories[con.dep_station]
-            if con.arr_station in self.best_trajectories and con.arr_station != self.arr_station:
+            if con.arr_station in self.best_trajectories:
                 time_to_beat = self.best_trajectories[con.arr_station].ts_to_beat(self.keep_n)
             else:
                 time_to_beat = 2e30

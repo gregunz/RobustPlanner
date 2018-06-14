@@ -45,8 +45,8 @@ def get_connections():
     speed = int(request.args.get('speed'))
     top_n = 5
 
-    key = '{}_{}_{}_{}_{}_{}_{}'.format(
-        departure_station, arrival_station, start_time, start_date, certainty, speed, top_n
+    key = '{}_{}_{}_{}_{}_{}'.format(
+        departure_station, start_time, start_date, certainty, speed, top_n
     )
     if key in csa_cache:
         csa_sbb = csa_cache[key]
