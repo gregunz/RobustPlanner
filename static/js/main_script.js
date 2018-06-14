@@ -275,3 +275,15 @@ function buy_tickets(){
     //link = encodeURI(link);
     window.open(link, '_blank');
 }
+
+$(document).ready(function () {
+    swal({
+        title: "Welcome!",
+        text: "Would not it be better if you could know how certain your journey will be ?" +
+        " With Robust Planner your dreams become reality!\n\n" +
+        "notes: \n" +
+        "- click on markers for details\n" +
+        "- the top 5 journeys satifying your criterias will be computed",
+        button: "Let's get started",
+    });
+});
