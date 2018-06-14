@@ -56,7 +56,7 @@ function draw_trip(trip) {
         starting_time = starting_time.toGMTString();
     }
 
-    draw_marker(path[0].from_city, "Starting at: " + starting_time);
+    draw_marker(path[0].from_city, "Leaving at: " + starting_time);
 
     let i = 0;
     while(i < path.length - 1) {
@@ -84,7 +84,7 @@ function draw_trip(trip) {
         i = i + 1;
     }
     create_line(path[path.length-1]);
-    draw_marker(path[path.length-1].to_city, path[path.length-1].arrival_time);
+    draw_marker(path[path.length-1].to_city, "Arrived at: " +path[path.length-1].arrival_time);
     update_graph();
 
     //center the map
