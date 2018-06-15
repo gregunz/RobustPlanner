@@ -1,10 +1,18 @@
 from copy import copy
-import pickle
 
 print(__name__ + ' loading...')
 
+# a Connection is like a edge in a graph of all possible connections with the time and an id
+# i.e from dep_station leaves at time dep_ts -> arrives at arr_station at time arr_ts by train/bus number trip_id
 class Connection:
     def __init__(self, dep_station, arr_station, dep_ts, arr_ts, trip_id):
+        """
+        :param dep_station: departure station
+        :param arr_station: arrival station
+        :param dep_ts: departure timestamp
+        :param arr_ts: arrival timestamp
+        :param trip_id
+        """
         self.dep_station = dep_station
         self.arr_station = arr_station
         self.dep_ts = dep_ts
@@ -21,8 +29,17 @@ class Connection:
         return 'FROM={}, TO={}, START={}, END={} ({})' \
             .format(self.dep_station, self.arr_station, self.dep_ts, self.arr_ts, self.trip_id, self.trip_id)
 
+
+# a History of all stations used in a way
 class History:
     def __init__(self, station, arr_ts, duration, cum_certainty, trip_id):
+        """
+        :param station: station name (string)
+        :param arr_ts: arrival timestamp (int)
+        :param duration: duration of the trip to this station
+        :param cum_certainty
+        :param trip_id
+        """
         d = self.to_dict(station, arr_ts, duration, cum_certainty, trip_id)
         self.hist = [d]
 
@@ -78,8 +95,18 @@ class History:
 
 
 
+# a OneWay is one of the states of the trajectory which holds information such as
+# the station reached with the time, the duration of the taken travel, the cumulative certainty
+# the trip_id and the history
 class OneWay:
     def __init__(self, arr_station, arr_ts, duration, cum_certainty, trip_id):
+        """
+        :param arr_station: arrival station
+        :param arr_ts: arrival timestamp
+        :param duration: duration of the way
+        :param cum_certainty: cumulative certainty
+        :param trip_id: trip id
+        """
         self.arr_station = arr_station
         self.arr_ts = arr_ts
         self.duration = duration
@@ -115,9 +142,13 @@ class OneWay:
         return 'arr_ts={}, cum_certainty={}, num_node={}' \
             .format(self.arr_ts, self.cum_certainty, len(self.hist.hist))
 
-
+# a Trajectory holds multiple OneWay and is in charge of keeping the best ones
+# when new ones are added
 class Trajectory:
     def __init__(self, way):
+        """
+        :param way: OneWay object
+        """
         self.ways = [way]
 
     def update(self, new_way, keep_n):
@@ -144,9 +175,18 @@ class Trajectory:
             return self.ways[keep_n - 1].arr_ts
 
 
-
+# Connection Scan Algorithm implementation https://arxiv.org/abs/1703.05997
 class CSA:
     def __init__(self, dep_station, arr_station, dep_ts, min_certainty, get_certainty, get_nearby_connections, keep_n=3):
+        """
+        :param dep_station: departure station (string)
+        :param arr_station: arrival station (string)
+        :param dep_ts: departure timestamp (int)
+        :param min_certainty: minimum certainty (float) (<= 1)
+        :param get_certainty: function which returns certainty given a trip id and a potential delay
+        :param get_nearby_connections: function which returns connections given a station name and a departure time
+        :param keep_n: number of best OneWays to keep per Trajectory
+        """
         self.dep_station = dep_station
         self.arr_station = arr_station
         self.dep_ts = dep_ts
@@ -208,7 +248,7 @@ class CSA:
             station = self.arr_station
         return [w.hist for w in self.get_ways(station)]
 
-
+# useful function when developing CSA
 def debug(csa):
     print('FROM: {}'.format(csa.dep_station))
     for dep_station, trajectory in csa.best_trajectories.items():

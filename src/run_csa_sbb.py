@@ -18,6 +18,7 @@ connections_sbb = pickle.load(open('../pickle/connections.pickle', 'rb')) #get_c
 all_stations = sorted(list(set([c.dep_station for day in range(7) for c in connections_sbb[day]])))
 
 
+# run csa algorithm with all the sbb connections of a given day
 def run(
     departure_station,
     arrival_station,
@@ -27,6 +28,16 @@ def run(
     top_n,
     with_tqdm = True
 ):
+    """
+    :param departure_station
+    :param arrival_station
+    :param departure_timestamp
+    :param min_certainty
+    :param speed: to walk to another nearby station
+    :param top_n: top n stations satisfying the minimum certainty
+    :param with_tqdm: useful in notebooks (shows a progress bar)
+    :return: csa.CSA object
+    """
     
     day = datetime.datetime.fromtimestamp(departure_timestamp).weekday()
     departure_timestamp = to_departure_time_stamp(day, departure_timestamp)
