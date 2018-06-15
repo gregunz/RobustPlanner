@@ -287,7 +287,11 @@ function display_welcome() {
         "- the top 5 journeys satifying your criterias will be computed and proposed\n" +
         "- project in beta (works better on Chrome and Firefox)",
         button: "Let's get started"
+    }).then(function(isConfirm) {
+        Cookies.set("visited", true);
     });
 }
 
-$(document).ready(display_welcome());
+if(!Cookies.get('visited')){
+    $(document).ready(display_welcome());
+}
