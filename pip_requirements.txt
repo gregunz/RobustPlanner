@@ -1,6 +1,0 @@
-numpy
-pandas==0.21
-flask
-geopy
-folium
-tqdm
