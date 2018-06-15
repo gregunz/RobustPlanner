@@ -7,11 +7,11 @@ import datetime
 
 class Station:
     """ Represent all information about a train/bus stations"""
-    previous_station: str = '' # from where you arrive
-    arrival_time: int = 0 #when you arrived at that station 
+    previous_station = '' # from where you arrive
+    arrival_time = 0 #when you arrived at that station
     departure_time = 0 #time to leave to that that connection that arrive at station
-    trip_id: str = '' #with which trip you arrive at that station
-    cumul_success_prob: float = 1.0 #the cumulative proba that the trip fails
+    trip_id = '' #with which trip you arrive at that station
+    cumul_success_prob = 1.0 #the cumulative proba that the trip fails
     success_prob = 1.0
 
     def __init__(self, previous_station, departure_time, arrival_time, trip_id, success_proba, cumul_success_prob):

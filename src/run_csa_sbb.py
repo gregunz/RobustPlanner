@@ -1,5 +1,4 @@
 from tqdm import tqdm_notebook as tqdm
-tqdm.monitor_interval = 0
 
 import datetime
 import pickle
