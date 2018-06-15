@@ -276,15 +276,18 @@ function buy_tickets(){
     window.open(link, '_blank');
 }
 
-$(document).ready(function () {
+function display_welcome() {
     swal({
         title: "Welcome!",
         text: "Would not it be better if you could know how certain your journey will be ?" +
         " With Robust Planner your dreams become reality!\n\n" +
         "notes: \n" +
         "- click on markers for details\n" +
-        "- the top 5 journeys satifying your criterias will be computed\n" +
+        "- markers are only positioned at start, end and where you change trains, buses or trams\n" +
+        "- the top 5 journeys satifying your criterias will be computed and proposed\n" +
         "- project in beta (works better on Chrome and Firefox)",
-        button: "Let's get started",
+        button: "Let's get started"
     });
-});
+}
+
+$(document).ready(display_welcome());

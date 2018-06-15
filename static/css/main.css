@@ -50,14 +50,14 @@
 .loader,
 .loader:before,
 .loader:after {
-  background: #fc0606;
+  background: #dc3545;
   -webkit-animation: load1 1s infinite ease-in-out;
   animation: load1 1s infinite ease-in-out;
   width: 1em;
   height: 4em;
 }
 .loader {
-  color: #fc0606;
+  color: #dc3545;
   text-indent: -9999em;
   top: 0;
   left: 0;
@@ -157,6 +157,25 @@ h4 {
 
 form {
   padding-bottom: 10px;
+}
+
+.float{
+  position:fixed;
+  width:60px;
+  height:60px;
+  bottom:40px;
+  left:40px;
+  background-color: #dc3545;
+  color:#FFF;
+  border-radius:50px;
+  text-align:center;
+  box-shadow: 2px 2px 3px #999;
+
+  z-index: 99999;
+}
+
+.my-float{
+  margin-top:22px;
 }
 
 @media only screen and (max-width: 600px) {
