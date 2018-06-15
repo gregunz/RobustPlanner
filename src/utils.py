@@ -4,7 +4,7 @@ from translation import translate
 import pickle
 
 def load_data(file, translated = False):
-    """Load data from the cvs file
+    """Load data from the csv file
     Args:
         file: the file path of the csv file
         translated: a boolean set to True if you want the return dataframe to be translated into english
