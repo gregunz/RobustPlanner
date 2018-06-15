@@ -174,7 +174,7 @@ def updateGraphWithWalk(g):
     WARNING this method should not be call more than once
     """
     tr = load_LongLatDict()
-    allStation = get_all_stops()
+    allStation = g.stationsConnection.keys()
 
     for s in tqdm(allStation):
         nearStations = getNearByStation(s, allStation, tr, distMax=0.5)

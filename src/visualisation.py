@@ -1,10 +1,10 @@
 import folium
-from utils import getLongLat
+from utils import load_LongLatDict
 
 def showStation(stations, markers = []):
     """ Show a map with all the stations
     """
-    loc = getLongLat('Zürich HB')
+    loc = load_LongLatDict()['Zürich HB']
     my_map = folium.Map(location=loc)
     for m in markers:
         folium.Marker(getLongLat(m), popup=m).add_to(my_map)
@@ -22,12 +22,11 @@ def showStation(stations, markers = []):
 def showPath(path):
     """ Show a map with a path draw on it
     """
-    loc = getLongLat('Zürich HB')
+    dict_long_lat = load_LongLatDict()
+    loc = dict_long_lat['Zürich HB']
     my_map = folium.Map(location=loc)
-    p1 = path[:-1]
-    p2 = path[1:]
-    for i in range(len(p1)):
-        p1_ = getLongLat(p1[i])
-        p2_ = getLongLat(p2[i])
+    for p in path:
+        p1_ = dict_long_lat[p[0]]
+        p2_ = dict_long_lat[p[1]]
         folium.PolyLine(locations=[p1_, p2_], color='blue').add_to(my_map)
     return my_map
