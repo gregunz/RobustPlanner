@@ -108,3 +108,32 @@ def load_metadata():
     metadata_df["Longitude"] = pd.to_numeric(metadata_df["Longitude"])
     metadata_df["Latitude"] = pd.to_numeric(metadata_df["Latitude"])
     return metadata_df
+
+def to_timestamp(x, date_format):
+    '''
+        Transform a date to its timestamp given a date_format.
+        NaN values are mapped to -99999
+    '''
+    if pd.isnull(x):
+        return -99999
+    else:
+        return time.mktime(datetime.datetime.strptime(x, date_format).timetuple())
+
+
+def time_diff(x, y):
+    '''
+        Compute the time difference between two values.
+    '''
+    if (x == -99999) & (y == -99999):
+        return -99999
+    elif (x == -99999) | (y == -99999):
+        return 0
+    else:
+        return y - x
+
+
+def get_day(x):
+    if pd.isnull(x):
+        return -1
+    else:
+        return datetime.datetime.strptime(x, "%d.%m.%Y").weekday()
