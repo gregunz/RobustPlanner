@@ -1,7 +1,7 @@
 from utils import get_all_stops, load_LongLatDict
 from tqdm import tqdm_notebook as tqdm
 from datetime import timedelta
-from algo import *
+from dijkstra import *
 import pickle
 
 class Departure():
