@@ -160,7 +160,7 @@ if __name__ == '__main__':
     g = getWalkGraph()
     stops = all_stations
     longLat = load_LongLatDict()
-    risk_cache = pickle.load(open('pickle/risk_cache.pickle', "rb" ))
+    risk_cache = pickle.load(open('../pickle/risk_cache.pickle', "rb" ))
     print("files loaded")
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

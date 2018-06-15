@@ -1,8 +1,6 @@
 from utils import get_all_stops, load_LongLatDict
 from tqdm import tqdm_notebook as tqdm
 from datetime import timedelta
-from itertools import groupby
-from operator import itemgetter
 from algo import *
 import pickle
 
@@ -185,7 +183,7 @@ def updateGraphWithWalk(g):
             g.stationsConnection[s] = g.stationsConnection[s] + nearConnection 
         else:
             g.stationsConnection[s] = nearConnection
-    pickle.dump(g, open("pickle/graph_walk.p", "wb" ))
+    pickle.dump(g, open("../pickle/graph_walk.p", "wb" ))
     return g
 
 
@@ -193,9 +191,9 @@ def getGraph():
     """
     Return: a precomputed graph without the walk connection
     """
-    return pickle.load(open("pickle/graph.p", "rb" ))
+    return pickle.load(open("../pickle/graph.p", "rb" ))
 def getWalkGraph():
     """
     Return: a precomputed graph with the walk connection added
     """
-    return pickle.load(open("pickle/graph_walk.p", "rb" ))
+    return pickle.load(open("../pickle/graph_walk.p", "rb" ))

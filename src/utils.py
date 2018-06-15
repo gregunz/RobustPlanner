@@ -29,22 +29,22 @@ def store_all_stops():
     """ Save the list of all stations into a pickle file
     """
     stops = get_all_stops()
-    pickle.dump(stops, open("pickle/stops.p", "wb" ))
+    pickle.dump(stops, open("../pickle/stops.p", "wb" ))
 def load_all_stops():
     """Load the list of all stations from the pickle file created by store_all_stops()
     """
-    return pickle.load(open("pickle/stops.p", "rb" ))
+    return pickle.load(open("../pickle/stops.p", "rb" ))
 
 def store_LongLatDict():
     """Save a dict mapping station name to (Longitude, Latitude)
     """
     d = createLongLatDict()
-    pickle.dump(d, open("pickle/longLatDict.p", "wb" ))
+    pickle.dump(d, open("../pickle/longLatDict.p", "wb" ))
 
 def load_LongLatDict():
     """Load a dict mapping station name to (Longitude, Latitude)
     """
-    return pickle.load(open("pickle/longLatDict.p", "rb" ))
+    return pickle.load(open("../pickle/longLatDict.p", "rb" ))
 
 def get_all_stops():
     """

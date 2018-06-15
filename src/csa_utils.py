@@ -5,7 +5,7 @@ from csa import Connection
 print(__name__ + ' loading...')
 
 def get_connections(day):
-    df_connections = pd.read_csv('links/links_{}.csv'.format(day), header=None)
+    df_connections = pd.read_csv('../links/links_{}.csv'.format(day), header=None)
     return df_connections.apply(lambda x: Connection(*x), axis=1).values.tolist()
 
 def get_connections_per_day():

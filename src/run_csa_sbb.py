@@ -10,11 +10,11 @@ from csa_utils import to_departure_time_stamp
 
 print(__name__ + ' loading...')
     
-risk_cache = pickle.load(open('pickle/risk_cache.pickle', 'rb'))
+risk_cache = pickle.load(open('../pickle/risk_cache.pickle', 'rb'))
 
-nearby_stations_and_dist_cache = pickle.load(open('pickle/nearby_stations_and_dist.pickle', 'rb'))
+nearby_stations_and_dist_cache = pickle.load(open('../pickle/nearby_stations_and_dist.pickle', 'rb'))
 
-connections_sbb = pickle.load(open('pickle/connections.pickle', 'rb')) #get_connections_per_day()
+connections_sbb = pickle.load(open('../pickle/connections.pickle', 'rb')) #get_connections_per_day()
 
 all_stations = sorted(list(set([c.dep_station for day in range(7) for c in connections_sbb[day]])))
 
